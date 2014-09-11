@@ -6,6 +6,8 @@ import java.net.SocketAddress;
 import java.net.SocketException;
 import java.net.UnknownHostException;
 import java.nio.ByteBuffer;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.concurrent.TimeUnit;
 
 
@@ -27,6 +29,17 @@ public class Client {
 	}
 	
 	public void sendPacket() throws InterruptedException, IOException {
+		
+		// Data to the final report
+		
+		long minimumRtt = 0;
+		long averageRtt = 0;
+		long maximumRtt = 0;
+		
+		int numLostPackets = 0;
+		
+		ArrayList<Long> rttList = new ArrayList<Long>();
+		
 		
 		DatagramSocket clientSocket = new DatagramSocket(null);
 		int sequence = 1; // In the assignment, the fist packet is the number 1
@@ -89,9 +102,14 @@ public class Client {
 				
 				long rtt = receivingTime - packetTime; // The time now minus the original time when the packet was sent
 				
+				rttList.add(rtt);
+				
 				System.out.println("size="+ packetSize +" from="+ packetRemoteHost +" seq="+ packetSequence +" rtt="+ rtt +" ms");	
 				
 			}else{
+				
+				numLostPackets++;
+				
 				System.out.println("A packet was lost...");
 			}
 			
@@ -108,6 +126,21 @@ public class Client {
 			TimeUnit.SECONDS.sleep(1);
 			sequence++;
 		}
+		
+		Collections.sort(rttList);
+		
+		minimumRtt = (Long) rttList.get(0);
+		maximumRtt = (Long) rttList.get(rttList.size()-1);
+		
+		for(Long rttI: rttList){
+			averageRtt += rttI/(rttList.size());
+		}
+		
+		System.out.println("sent="+ packetCount +" received="+ (packetCount-numLostPackets)  
+				+" lost="+((numLostPackets/packetCount)*100) 
+				+"% rtt min/avg/max="+ minimumRtt +"/"+ averageRtt +"/"+maximumRtt +" ms");
+		
+		
 	}
 	
 	

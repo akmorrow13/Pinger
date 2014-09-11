@@ -1,0 +1,15 @@
+[1] Comment
+
+
+The basic structure of the project is done and working. However, 
+there is a problem with the situation when the packet is lost or wrong.
+The method 'receive' stop the flow of the program until the socket receive
+something (Client.java, line 63). So, the client will not send more packet while 
+this don't happen. 
+
+My suggestion is to create a thread responsible to receive the packets and to print them in the screen.
+With that, the client would continue sending packets independently if it are receiving packets or not.
+
+What do you think?
+
+
