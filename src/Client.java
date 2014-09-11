@@ -27,8 +27,9 @@ public class Client {
 	}
 	
 	public void sendPacket() throws InterruptedException, IOException {
+		
 		DatagramSocket clientSocket = new DatagramSocket(null);
-		int sequence = 0;
+		int sequence = 1; // In the assignment, the fist packet is the number 1
 		
 		try {
 			clientSocket = new DatagramSocket(localPort);
@@ -50,14 +51,59 @@ public class Client {
 			
 			InetAddress IPAddress = InetAddress.getByName(remoteHost);
 			
-			DatagramPacket packet = new DatagramPacket(message, 0, message.length, IPAddress, remotePort);
-			clientSocket.send(packet);
-			clientSocket.receive(packet);
+			// Sending the packet
 			
-			// Check if packet is from the correct remote Host
-			if (IPAddress != packet.getAddress() || remotePort != packet.getPort()) {
-				// this was a lost packet
+			DatagramPacket sendingPacket = new DatagramPacket(message, 0, message.length, IPAddress, remotePort);
+			clientSocket.send(sendingPacket);
+			
+			// Receiving the packet from the Server
+			
+			byte[] serverBuffer = new byte[12];
+			DatagramPacket receivingPacket = new DatagramPacket(serverBuffer, serverBuffer.length);	
+			clientSocket.receive(receivingPacket);
+			long receivingTime = System.currentTimeMillis();
+			
+			ByteBuffer bb = ByteBuffer.wrap(serverBuffer);
+			
+			// Check if the packet sent is the same of the received
+			
+			boolean packetsEqual = true;
+			
+			for(int j = 0; j < serverBuffer.length; j++){
+				
+				// If one byte is different, the packets are not equal
+				
+				if (serverBuffer[j] != message[j]){
+					packetsEqual = false;
+					break;
+				}
+				
 			}
+			
+			if(packetsEqual){
+				
+				int packetSize = receivingPacket.getLength();
+				String packetRemoteHost = receivingPacket.getAddress().getHostName();
+				int packetSequence = bb.getInt(); // Actually, it is necessary to get the first 4 bytes from the array
+				long packetTime = bb.getLong();
+				
+				long rtt = receivingTime - packetTime; // The time now minus the original time when the packet was sent
+				
+				System.out.println("size="+ packetSize +" from="+ packetRemoteHost +" seq="+ packetSequence +" rtt="+ rtt +" ms");	
+				
+			}else{
+				System.out.println("A packet was lost...");
+			}
+			
+			
+			
+			// Check if packet received is equal to packet sent
+			
+			
+			
+			//if (IPAddress != packet.getAddress() || remotePort != packet.getPort()) {
+				// this was a lost packet
+			//}
 			
 			TimeUnit.SECONDS.sleep(1);
 			sequence++;
@@ -67,7 +113,7 @@ public class Client {
 	
 	
 
-	public void printInfo(int size, String IP, int sequence, int time) {
+	public void printInfo(DatagramPacket returnedPacket) {
 		
 	}
 	
