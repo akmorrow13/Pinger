@@ -56,9 +56,11 @@ public class Pinger {
 		} else {
 			
 			System.out.println("Error: missing or additional arguments");
+			System.exit(-2);
 		}
 			 
-		
+		// If everything finished OK
+		System.exit(0);	
 		
 	}
 	
