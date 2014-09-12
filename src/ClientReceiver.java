@@ -14,7 +14,6 @@ public class ClientReceiver implements Runnable {
 	DatagramPacket receivingPacket;
 	
 	byte[][] packetsSent;
-	byte[][] packetsReceived;
 	byte[] serverBuffer;
 	
 
@@ -35,7 +34,7 @@ public class ClientReceiver implements Runnable {
 		this.clientSocket = clientSocket;
 		
 		packetCount = packetsSent.length;
-		packetsReceived = new byte[packetCount][12];
+
 	}
 	
 	// Methods
@@ -45,7 +44,7 @@ public class ClientReceiver implements Runnable {
 	@Override
 	public void run() {	
 
-		int order = 0;
+		int order = 1;
 
 		while(true){
 
@@ -61,9 +60,11 @@ public class ClientReceiver implements Runnable {
 				e.printStackTrace();
 			}
 
-			packetsReceived[order] = serverBuffer;
 			long receivingTime = System.currentTimeMillis();
-
+			
+			ByteBuffer bb = ByteBuffer.wrap(serverBuffer);
+			int sequencePacketReceived = bb.getInt(0);
+			
 
 			// Check if the packet sent is equal to the received
 
@@ -73,18 +74,23 @@ public class ClientReceiver implements Runnable {
 
 				// If one byte is different, the packets are not equal
 
-				if (packetsSent[order][i] != packetsReceived[order][i]){
+				if (packetsSent[sequencePacketReceived-1][i] != serverBuffer[i]){
 					packetsEqual = false;
 					break;
 				}
 
 			}
 			
+			// If a packet is received before your previous packet, so the previous was lost.
+			
+			if(sequencePacketReceived != order){
+				numLostPackets++;
+				order = sequencePacketReceived;
+			}
+			
 
 
 			if(packetsEqual){
-
-				ByteBuffer bb = ByteBuffer.wrap(serverBuffer);
 
 				int packetSize = receivingPacket.getLength();
 				String packetRemoteHost = receivingPacket.getAddress().getHostName();
@@ -101,38 +107,42 @@ public class ClientReceiver implements Runnable {
 
 				numLostPackets++;
 
-				System.out.println("This packet was lost...");
+				System.out.println("This packet is broken/ wrong...");
 			}
 			
 			order++;
 
-
 		}
 		
-
 	}
 	
 	// This method prints the final summary
 	
 	public void printSummary(){
 		
-		Collections.sort(rttList);
-		
-		minimumRtt = (Long) rttList.get(0);
-		maximumRtt = (Long) rttList.get(rttList.size()-1);
-		
-		float rttListSize = (float) rttList.size();
+		if(rttList.size() > 1) {
+			
+			Collections.sort(rttList);
+			
+			minimumRtt = (Long) rttList.get(0);
+			maximumRtt = (Long) rttList.get(rttList.size()-1);
+			
+			float rttListSize = (float) rttList.size();
+					
+			for(Long rttI: rttList){
 				
-		for(Long rttI: rttList){
+				
+				averageRtt += (float) rttI/rttListSize;
+	
+			}
+	
+			System.out.println("sent="+ packetCount +" received="+ (packetCount-numLostPackets)  
+					+" lost="+((numLostPackets/packetCount)*100) 
+					+"% rtt min/avg/max="+ minimumRtt +"/"+ averageRtt +"/"+maximumRtt +" ms");
+		} else {
 			
-			
-			averageRtt += (float) rttI/rttListSize;
-
+			System.out.println("No packet received");
 		}
-
-		System.out.println("sent="+ packetCount +" received="+ (packetCount-numLostPackets)  
-				+" lost="+((numLostPackets/packetCount)*100) 
-				+"% rtt min/avg/max="+ minimumRtt +"/"+ averageRtt +"/"+maximumRtt +" ms");
 	}
 	
 }

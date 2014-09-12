@@ -1,4 +1,4 @@
-all: Client.class Server.class Pinger.class
+all: Client.class Server.class Pinger.class ClientReceiver.class
 
 %.class: %.java
 
