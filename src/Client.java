@@ -77,6 +77,10 @@ public class Client {
 		}
 		
 		// In the end, show the summary and stop the thread
+		while(!clientReceiver.isFinalized()){
+				TimeUnit.SECONDS.sleep(1);
+		}
+		
 		clientReceiver.printSummary();
 		thread.interrupt();
 		
