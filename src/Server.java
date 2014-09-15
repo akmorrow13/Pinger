@@ -71,7 +71,8 @@ public class Server {
 	private void sendMessageBackClient(DatagramSocket socket, DatagramPacket packet) throws IOException{
 		
 		byte[] messageToClient = packet.getData();
-	    DatagramPacket messageBack = new DatagramPacket(messageToClient, messageToClient.length, packet.getAddress(), packet.getPort());
+	    
+		DatagramPacket messageBack = new DatagramPacket(messageToClient, messageToClient.length, packet.getAddress(), packet.getPort());
 	    socket.send(messageBack);
 	}
 

@@ -1,9 +1,18 @@
-all: Client.class Server.class Pinger.class ClientReceiver.class
+JFLAGS = -g
+JC = javac
+.SUFFIXES: .java .class
+.java.class:
+	$(JC) $(JFLAGS) $*.java
 
-%.class: %.java
+CLASSES = \
+        Client.java \
+        Server.java \
+        ClientReceiver.java \
+        Pinger.java 
 
-	javac -d . -classpath . $<
+default: classes
+
+classes: $(CLASSES:.java=.class)
 
 clean:
-
-	rm -f *.class 
+	$(RM) *.class

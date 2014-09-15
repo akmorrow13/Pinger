@@ -1,11 +1,13 @@
-Comments
+Comments 09/14/2014
 
-Hi Alyssa,
+I implemented more some things and now we need to test it in the mininet. I did some test in my computer with two scenarios:
 
-I implemented the threading in the Client mode. The program looks working, but we need do more tests. For example, sending pings from my machine to my machine rarely provokes a mistake. So, I don't know whether the program is working with lost packets yet.  I think we need do the simulations in the mininet (step 4).
+1) With timed out;
 
-Please, give your opinion for us decide the next step.
+2) With broken/wrong packets.
 
-Thank you.
 
+In both, the program ran correctly. =) 
+
+ 
 
